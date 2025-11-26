@@ -1,0 +1,12 @@
+services:
+  app1:
+    build: .
+    container_name: app1
+    volumes:
+      - /data/nginx/vhosts:/data/nginx/vhosts
+    networks:
+      - internal
+
+networks:
+  internal:
+    external: true

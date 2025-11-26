@@ -1,0 +1,55 @@
+services:
+  nginx:
+    build: ./nginx
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - internal
+    volumes:
+      - /data/nginx/vhosts:/etc/nginx/conf.d/vhosts
+
+  database:
+    build: ./database
+    image: mariadb:10.11
+    container_name: database
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456789
+    networks:
+      - internal
+
+  elasticsearch:
+    build: ./elasticsearch
+    image: elasticsearch:2.3.4
+    container_name: elasticsearch
+    environment:
+      - CLUSTER_NAME=edirectory-cluster
+      - NODE_NAME=node-1
+      - ES_HEAP_SIZE=512m
+    networks:
+      - internal
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: database
+      PMA_USER: root
+      PMA_PASSWORD: 123456789
+    networks:
+      - internal
+
+  cerebro:
+    image: lmenezes/cerebro:latest
+    container_name: cerebro
+    environment:
+      CEREBRO_PORT: 9000
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+    name: internal

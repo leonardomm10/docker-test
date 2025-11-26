@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Create /data/nginx/vhosts directory
+      file:
+        path: /data/nginx/vhosts
+        state: directory
+        mode: "0755"
+        recurse: yes
+
+    - name: Deploy infra
+      community.docker.docker_compose_v2:
+        project_src: "./infra"
+        state: present

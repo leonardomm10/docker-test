@@ -1,0 +1,107 @@
+services:
+  # nginx:
+  #   build: ./nginx
+  #   container_name: nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   networks:
+  #     - internal
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "8080:8080"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - internal
+
+  database:
+    build: ./database
+    container_name: database
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456789
+    networks:
+      - internal
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: database
+      PMA_USER: root
+      PMA_PASSWORD: 123456789
+    depends_on:
+      - database
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.localhost`)"
+      - "traefik.http.routers.phpmyadmin.entrypoints=web"
+
+  elasticsearch-node-1:
+    build: ./elasticsearch
+    container_name: elasticsearch-node-1
+    environment:
+      - CLUSTER_NAME=edirectory-cluster
+      - NODE_NAME=edirectory-node-1
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      # - MINIMUM_MASTER_NODES=2
+      # - UNICAST_HOSTS=elasticsearch-node-1,elasticsearch-node-2,elasticsearch-node-3
+    networks:
+      internal:
+        aliases:
+          - elasticsearch
+  # elasticsearch-node-2:
+  #   build: ./elasticsearch
+  #   container_name: elasticsearch-node-2
+  #   environment:
+  #     - CLUSTER_NAME=edirectory-cluster
+  #     - NODE_NAME=edirectory-node-2
+  #     - MINIMUM_MASTER_NODES=2
+  #     - UNICAST_HOSTS=elasticsearch-node-1,elasticsearch-node-2,elasticsearch-node-3
+  #   networks:
+  #     internal:
+  #       aliases:
+  #         - elasticsearch
+  # elasticsearch-node-3:
+  #   build: ./elasticsearch
+  #   container_name: elasticsearch-node-3
+  #   environment:
+  #     - CLUSTER_NAME=edirectory-cluster
+  #     - NODE_NAME=edirectory-node-3
+  #     - MINIMUM_MASTER_NODES=2
+  #     - UNICAST_HOSTS=elasticsearch-node-1,elasticsearch-node-2,elasticsearch-node-3
+  #   networks:
+  #     internal:
+  #       aliases:
+  #         - elasticsearch
+  cerebro:
+    image: lmenezes/cerebro:latest
+    container_name: cerebro
+    environment:
+      - CEREBRO_PORT=9000
+    depends_on:
+      - elasticsearch-node-1
+      # - elasticsearch-node-2
+      # - elasticsearch-node-3
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cerebro.rule=Host(`cerebro.localhost`) || Host(`cerebro2.localhost`)"
+      - "traefik.http.routers.cerebro.entrypoints=web"
+      - "traefik.http.services.cerebro.loadbalancer.server.port=9000"
+
+networks:
+  internal:
+    driver: bridge

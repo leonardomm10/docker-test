@@ -1,0 +1,29 @@
+# ------------------------------ Arca Solutions --------------------------------
+cluster.name: ${CLUSTER_NAME}
+node.name: ${NODE_NAME}
+# path.data: /elasticsearch/data
+# path.logs: /elasticsearch/logs
+# path.plugins: /elasticsearch/plugins
+# path.scripts: /elasticsearch/scripts
+network.host: 0.0.0.0
+http.port: 9200
+# Curl Delete all off
+action.destructive_requires_name: true
+# bootstrap.mlockall: true
+# discovery.zen.minimum_master_nodes: ${MINIMUM_MASTER_NODES}
+# discovery.zen.ping.unicast.hosts: ${UNICAST_HOSTS}
+
+# --------------------------------- Scripts ------------------------------------
+# Groovy Script files
+script.engine.groovy.file.aggs: true
+script.engine.groovy.file.mapping: true
+script.engine.groovy.file.search: true
+script.engine.groovy.file.update: true
+script.engine.groovy.file.plugin: true
+
+# Groovy Script Inline
+script.engine.groovy.inline.aggs: true
+script.engine.groovy.inline.mapping: false
+script.engine.groovy.inline.search: true
+script.engine.groovy.inline.update: false
+script.engine.groovy.inline.plugin: false
