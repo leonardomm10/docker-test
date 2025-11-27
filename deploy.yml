@@ -17,23 +17,3 @@
         project_src: "{{ item.path }}"
         state: present
       loop: "{{ apps }}"
-
-    - name: Coletar todos os vhosts de todas apps
-      set_fact:
-        all_vhosts: "{{ all_vhosts | default([]) + query('fileglob', item.path ~ '/vhosts/*') }}"
-      loop: "{{ apps }}"
-
-    - name: Copiar vhosts
-      copy:
-        src: "{{ item }}"
-        dest: /data/nginx/vhosts/
-        mode: "0644"
-      loop: "{{ all_vhosts }}"
-
-    - name: Reload nginx
-      shell: |
-        set -e
-        docker exec nginx nginx -t
-        docker exec nginx nginx -s reload
-      args:
-        executable: /bin/bash

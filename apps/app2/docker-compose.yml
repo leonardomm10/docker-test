@@ -1,0 +1,26 @@
+services:
+  app2-php:
+    build: ./docker/php
+    image: app2-php
+    container_name: app2-php
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - internal
+  app2-apache:
+    build: ./docker/apache
+    image: app2-apache
+    container_name: app2-apache
+    volumes:
+      - ./src:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app2.rule=Host(`app2.localhost`) || Host(`app22.localhost`)"
+      - "traefik.http.routers.app2.entrypoints=web"
+      - "traefik.http.services.app2.loadbalancer.server.port=80"
+    networks:
+      - internal
+
+networks:
+  internal:
+    external: true

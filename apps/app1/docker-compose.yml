@@ -1,9 +1,23 @@
 services:
-  app1:
-    build: .
-    container_name: app1
+  app1-php:
+    build: ./docker/php
+    image: app1-php
+    container_name: app1-php
     volumes:
-      - /data/nginx/vhosts:/data/nginx/vhosts
+      - ./src:/var/www/html
+    networks:
+      - internal
+  app1-apache:
+    build: ./docker/apache
+    image: app1-apache
+    container_name: app1-apache
+    volumes:
+      - ./src:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app1.rule=Host(`app1.localhost`) || Host(`app11.localhost`)"
+      - "traefik.http.routers.app1.entrypoints=web"
+      - "traefik.http.services.app1.loadbalancer.server.port=80"
     networks:
       - internal
 
